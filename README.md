@@ -1,6 +1,5 @@
 <div align="center">
 
-<img src="screenshot.png" alt="WebSSH Console" width="800" />
 
 # WebSSH Console
 
