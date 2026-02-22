@@ -181,7 +181,8 @@ const indexHTML = `<!DOCTYPE html>
     .vkb.show{display:flex;}
     .vkb-btn{flex-shrink:0;padding:6px 12px;background:#0d1117;border:1px solid #2d3f5a;
       border-radius:6px;color:#94a3b8;font-family:var(--font-mono);font-size:.72rem;
-      cursor:pointer;transition:all .15s;user-select:none;-webkit-user-select:none;}
+      cursor:pointer;transition:all .15s;user-select:none;-webkit-user-select:none;
+      -webkit-tap-highlight-color:transparent;touch-action:manipulation;}
     .vkb-btn:active{background:#00d4ff22;color:#00d4ff;border-color:#00d4ff;}
     /* ---- ANIMATIONS ---- */
     @keyframes fadeDown{from{opacity:0;transform:translateY(-18px);}to{opacity:1;transform:translateY(0);}}
@@ -307,19 +308,19 @@ const indexHTML = `<!DOCTYPE html>
     <div id="terminal"></div>
     <!-- 移动端虚拟按键栏，键盘弹出时显示 -->
     <div class="vkb" id="vkb">
-      <button class="vkb-btn" onclick="sendCtrl('c')">Ctrl+C</button>
-      <button class="vkb-btn" onclick="sendKey('-')">-</button>
-      <button class="vkb-btn" onclick="sendKey('_')">_</button>
-      <button class="vkb-btn" onclick="sendKey('+')">+</button>
-      <button class="vkb-btn" onclick="sendKey('='")">=</button>
-      <button class="vkb-btn" onclick="sendKey('\\')"></button>
-      <button class="vkb-btn" onclick="sendKey('/')">/</button>
-      <button class="vkb-btn" onclick="sendKey(':'">:</button>
-      <button class="vkb-btn" onclick="sendKey('chmod '">chmod</button>
-      <button class="vkb-btn" onclick="sendKey('[A')">↑</button>
-      <button class="vkb-btn" onclick="sendKey('[B')">↓</button>
-      <button class="vkb-btn" onclick="sendKey('[D')">←</button>
-      <button class="vkb-btn" onclick="sendKey('[C')">→</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendCtrl('c')">Ctrl+C</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('-')">-</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('_')">_</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('+')">+</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('='")">=</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('\\')"></button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('/')">/</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey(':'">:</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('chmod '">chmod</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('[A')">↑</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('[B')">↓</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('[D')">←</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('[C')">→</button>
     </div>
   </div>
 </div>
