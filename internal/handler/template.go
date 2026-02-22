@@ -307,20 +307,19 @@ const indexHTML = `<!DOCTYPE html>
     <div id="terminal"></div>
     <!-- 移动端虚拟按键栏，键盘弹出时显示 -->
     <div class="vkb" id="vkb">
-      <button class="vkb-btn" onclick="sendKey('\x1b')">Esc</button>
-      <button class="vkb-btn" onclick="sendKey('\t')">Tab</button>
       <button class="vkb-btn" onclick="sendCtrl('c')">Ctrl+C</button>
-      <button class="vkb-btn" onclick="sendCtrl('d')">Ctrl+D</button>
-      <button class="vkb-btn" onclick="sendCtrl('z')">Ctrl+Z</button>
-      <button class="vkb-btn" onclick="sendCtrl('l')">Ctrl+L</button>
-      <button class="vkb-btn" onclick="sendKey('\x1b[A')">↑</button>
-      <button class="vkb-btn" onclick="sendKey('\x1b[B')">↓</button>
-      <button class="vkb-btn" onclick="sendKey('\x1b[C')">→</button>
-      <button class="vkb-btn" onclick="sendKey('\x1b[D')">←</button>
-      <button class="vkb-btn" onclick="sendKey('\x1b[H')">Home</button>
-      <button class="vkb-btn" onclick="sendKey('\x1b[F')">End</button>
-      <button class="vkb-btn" onclick="sendKey('\x1b[5~')">PgUp</button>
-      <button class="vkb-btn" onclick="sendKey('\x1b[6~')">PgDn</button>
+      <button class="vkb-btn" onclick="sendKey('-')">-</button>
+      <button class="vkb-btn" onclick="sendKey('_')">_</button>
+      <button class="vkb-btn" onclick="sendKey('+')">+</button>
+      <button class="vkb-btn" onclick="sendKey('='")">=</button>
+      <button class="vkb-btn" onclick="sendKey('\\')"></button>
+      <button class="vkb-btn" onclick="sendKey('/')">/</button>
+      <button class="vkb-btn" onclick="sendKey(':'">:</button>
+      <button class="vkb-btn" onclick="sendKey('chmod '">chmod</button>
+      <button class="vkb-btn" onclick="sendKey('[A')">↑</button>
+      <button class="vkb-btn" onclick="sendKey('[B')">↓</button>
+      <button class="vkb-btn" onclick="sendKey('[D')">←</button>
+      <button class="vkb-btn" onclick="sendKey('[C')">→</button>
     </div>
   </div>
 </div>
