@@ -82,7 +82,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 统一版本号：push tag 时用 tag 本身，手动触发时用输入的 version
       - name: Resolve version
         id: version
         run: |
@@ -91,7 +90,6 @@ jobs:
           else
             VERSION="${{ github.ref_name }}"
           fi
-          # 去掉开头的 v，得到纯数字版本，例如 1.0.1
           VERSION_NUM="${VERSION#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_num=$VERSION_NUM" >> $GITHUB_OUTPUT
@@ -120,6 +118,8 @@ jobs:
     name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 允许创建 tag 和 release
 
     steps:
       - uses: actions/download-artifact@v4
@@ -127,7 +127,6 @@ jobs:
           path: dist
           merge-multiple: true
 
-      # 手动触发时先创建 tag，否则 release 没有 tag 会报错
       - uses: actions/checkout@v4
         if: github.event_name == 'workflow_dispatch'
 
