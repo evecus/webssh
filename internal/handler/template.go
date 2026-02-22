@@ -308,19 +308,19 @@ const indexHTML = `<!DOCTYPE html>
     <div id="terminal"></div>
     <!-- 移动端虚拟按键栏，键盘弹出时显示 -->
     <div class="vkb" id="vkb">
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendCtrl('c')">Ctrl+C</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('-')">-</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('_')">_</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('+')">+</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('='")">=</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('\\')"></button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('/')">/</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey(':'">:</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('chmod '">chmod</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('[A')">↑</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('[B')">↓</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('[D')">←</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="sendKey('[C')">→</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendCtrl('c')">Ctrl+C</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('-')">-</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('_')">_</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('+')">+</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('='")">=</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('\\')"></button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('/')">/</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey(':'">:</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('chmod '">chmod</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('[A')">↑</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('[B')">↓</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('[D')">←</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('[C')">→</button>
     </div>
   </div>
 </div>
@@ -473,7 +473,16 @@ function resetBtn(){
   btn.disabled=false;
   btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg><span>'+t('btn_connect')+'</span>';
 }
-function sendKey(k){if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'input',data:k}));}
+function sendFocus(){if(term){term.focus();requestAnimationFrame(()=>term.focus());}}
+function sendKey(k){
+  if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'input',data:k}));
+  // 发送后立刻把焦点还给终端，保持输入法不关闭
+  if(term){
+    term.focus();
+    // 安卓需要延迟一帧再 focus
+    requestAnimationFrame(()=>term.focus());
+  }
+}
 function sendCtrl(c){sendKey(String.fromCharCode(c.charCodeAt(0)-96));}
 
 // 检测软键盘弹出（移动端）
