@@ -477,18 +477,27 @@ function sendCtrl(c){sendKey(String.fromCharCode(c.charCodeAt(0)-96));}
 
 // 检测软键盘弹出（移动端）
 const isMobile=()=>window.innerWidth<=640;
-let visualViewportHeight=window.visualViewport?window.visualViewport.height:window.innerHeight;
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize',()=>{
-    const vkb=document.getElementById('vkb');
-    if(!isMobile())return;
-    const newH=window.visualViewport.height;
-    const keyboardOpen=newH<visualViewportHeight*0.85;
-    keyboardOpen?vkb.classList.add('show'):vkb.classList.remove('show');
-    // 键盘弹出时重新fit终端
-    if(fitAddon)setTimeout(()=>{fitAddon.fit();if(term&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'resize',rows:term.rows,cols:term.cols}));},100);
-  });
+
+// 虚拟按键：移动端始终显示，不依赖键盘检测
+function updateVkb(){
+  const vkb=document.getElementById('vkb');
+  if(!vkb)return;
+  // 移动端且终端窗口打开时显示
+  if(isMobile()&&document.getElementById('term-window').classList.contains('open')){
+    vkb.classList.add('show');
+  }else{
+    vkb.classList.remove('show');
+  }
 }
+
+// 兼容性更好：监听 resize 重新fit
+window.addEventListener('resize',()=>{
+  if(fitAddon)setTimeout(()=>{
+    fitAddon.fit();
+    if(term&&ws&&ws.readyState===WebSocket.OPEN)
+      ws.send(JSON.stringify({type:'resize',rows:term.rows,cols:term.cols}));
+  },100);
+});
 
 function initTerm(){
   if(term)term.dispose();
@@ -529,6 +538,7 @@ window.addEventListener('resize',()=>{
 function openTermWindow(label){
   document.getElementById('term-title').textContent=label;
   document.getElementById('term-window').classList.add('open');
+  updateVkb();
   setTimeout(()=>{fitAddon&&fitAddon.fit();term&&term.focus();
     if(ws&&ws.readyState===WebSocket.OPEN&&term)ws.send(JSON.stringify({type:'resize',rows:term.rows,cols:term.cols}));
   },120);
