@@ -158,17 +158,31 @@ const indexHTML = `<!DOCTYPE html>
       background:#0d1117;border-radius:14px;border:1px solid #1e2d45;overflow:hidden;
       display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.6);
       animation:popIn .36s cubic-bezier(.22,1,.36,1) both;}
+    /* 移动端全屏 */
+    @media(max-width:640px){
+      #term-window{background:rgba(0,0,0,.7);align-items:flex-end;}
+      .term-popup{width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;border:none;animation:slideUp .3s cubic-bezier(.22,1,.36,1) both;}
+      @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+    }
     @keyframes popIn{from{transform:scale(.92) translateY(22px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
-    .term-titlebar{display:flex;align-items:center;padding:10px 16px;background:#111827;border-bottom:1px solid #1e2d45;gap:10px;flex-shrink:0;}
-    .term-dots{display:flex;gap:6px;}
-    .term-dot{width:12px;height:12px;border-radius:50%;}
-    .dot-red{background:#ff5f57;}.dot-yellow{background:#ffbd2e;}.dot-green{background:#28c840;}
-    .term-title-text{flex:1;text-align:center;font-family:var(--font-mono);font-size:.72rem;color:#64748b;margin-left:-90px;}
-    .btn-disc{display:flex;align-items:center;gap:5px;padding:5px 13px;background:transparent;
+    .term-titlebar{display:flex;align-items:center;padding:9px 14px;background:#111827;border-bottom:1px solid #1e2d45;gap:8px;flex-shrink:0;}
+    /* 只保留绿点 + 主机名左对齐 */
+    .term-status-dot{width:10px;height:10px;border-radius:50%;background:#28c840;flex-shrink:0;animation:pulse 2.5s ease-in-out infinite;}
+    .term-title-text{font-family:var(--font-mono);font-size:.75rem;color:#94a3b8;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .btn-disc{display:flex;align-items:center;gap:5px;padding:5px 12px;background:transparent;
       border:1px solid #ef4444;border-radius:6px;color:#ef4444;font-family:var(--font-mono);
-      font-size:.7rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+      font-size:.7rem;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
     .btn-disc:hover{background:#ef4444;color:#fff;}
-    #terminal{flex:1;overflow:hidden;padding:6px;}
+    #terminal{flex:1;overflow:hidden;padding:4px;}
+    /* 移动端虚拟按键栏 */
+    .vkb{display:none;flex-shrink:0;background:#1a2236;border-top:1px solid #1e2d45;
+      padding:6px 8px;gap:5px;overflow-x:auto;scrollbar-width:none;}
+    .vkb::-webkit-scrollbar{display:none;}
+    .vkb.show{display:flex;}
+    .vkb-btn{flex-shrink:0;padding:6px 12px;background:#0d1117;border:1px solid #2d3f5a;
+      border-radius:6px;color:#94a3b8;font-family:var(--font-mono);font-size:.72rem;
+      cursor:pointer;transition:all .15s;user-select:none;-webkit-user-select:none;}
+    .vkb-btn:active{background:#00d4ff22;color:#00d4ff;border-color:#00d4ff;}
     /* ---- ANIMATIONS ---- */
     @keyframes fadeDown{from{opacity:0;transform:translateY(-18px);}to{opacity:1;transform:translateY(0);}}
     @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
@@ -233,7 +247,7 @@ const indexHTML = `<!DOCTYPE html>
         <label data-i18n="label_username">用户名</label>
         <div class="input-wrap">
           <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <input type="text" id="username" data-i18n-ph="ph_username" placeholder="root"/>
+          <input type="text" id="username" data-i18n-ph="ph_username" placeholder="root（默认）"/>
         </div>
       </div>
       <div class="field full">
@@ -283,7 +297,7 @@ const indexHTML = `<!DOCTYPE html>
 <div id="term-window">
   <div class="term-popup">
     <div class="term-titlebar">
-      <div class="term-dots"><div class="term-dot dot-red"></div><div class="term-dot dot-yellow"></div><div class="term-dot dot-green"></div></div>
+      <div class="term-status-dot"></div>
       <div class="term-title-text" id="term-title">terminal</div>
       <button class="btn-disc" onclick="disconnect()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -291,6 +305,23 @@ const indexHTML = `<!DOCTYPE html>
       </button>
     </div>
     <div id="terminal"></div>
+    <!-- 移动端虚拟按键栏，键盘弹出时显示 -->
+    <div class="vkb" id="vkb">
+      <button class="vkb-btn" onclick="sendKey('\x1b')">Esc</button>
+      <button class="vkb-btn" onclick="sendKey('\t')">Tab</button>
+      <button class="vkb-btn" onclick="sendCtrl('c')">Ctrl+C</button>
+      <button class="vkb-btn" onclick="sendCtrl('d')">Ctrl+D</button>
+      <button class="vkb-btn" onclick="sendCtrl('z')">Ctrl+Z</button>
+      <button class="vkb-btn" onclick="sendCtrl('l')">Ctrl+L</button>
+      <button class="vkb-btn" onclick="sendKey('\x1b[A')">↑</button>
+      <button class="vkb-btn" onclick="sendKey('\x1b[B')">↓</button>
+      <button class="vkb-btn" onclick="sendKey('\x1b[C')">→</button>
+      <button class="vkb-btn" onclick="sendKey('\x1b[D')">←</button>
+      <button class="vkb-btn" onclick="sendKey('\x1b[H')">Home</button>
+      <button class="vkb-btn" onclick="sendKey('\x1b[F')">End</button>
+      <button class="vkb-btn" onclick="sendKey('\x1b[5~')">PgUp</button>
+      <button class="vkb-btn" onclick="sendKey('\x1b[6~')">PgDn</button>
+    </div>
   </div>
 </div>
 
@@ -442,24 +473,55 @@ function resetBtn(){
   btn.disabled=false;
   btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg><span>'+t('btn_connect')+'</span>';
 }
+function sendKey(k){if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'input',data:k}));}
+function sendCtrl(c){sendKey(String.fromCharCode(c.charCodeAt(0)-96));}
+
+// 检测软键盘弹出（移动端）
+const isMobile=()=>window.innerWidth<=640;
+let visualViewportHeight=window.visualViewport?window.visualViewport.height:window.innerHeight;
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',()=>{
+    const vkb=document.getElementById('vkb');
+    if(!isMobile())return;
+    const newH=window.visualViewport.height;
+    const keyboardOpen=newH<visualViewportHeight*0.85;
+    keyboardOpen?vkb.classList.add('show'):vkb.classList.remove('show');
+    // 键盘弹出时重新fit终端
+    if(fitAddon)setTimeout(()=>{fitAddon.fit();if(term&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'resize',rows:term.rows,cols:term.cols}));},100);
+  });
+}
+
 function initTerm(){
   if(term)term.dispose();
   const termEl=document.getElementById('terminal');
   termEl.innerHTML='';
+  const mobile=isMobile();
   term=new Terminal({
-    theme:{background:'#0d1117',foreground:'#e2e8f0',cursor:'#00d4ff',selectionBackground:'rgba(0,212,255,0.18)',
+    theme:{background:'#0d1117',foreground:'#e2e8f0',cursor:'#00d4ff',selectionBackground:'rgba(0,212,255,0.3)',
       black:'#1a2236',red:'#ef4444',green:'#10b981',yellow:'#f59e0b',blue:'#3b82f6',
       magenta:'#a855f7',cyan:'#00d4ff',white:'#e2e8f0',brightBlack:'#334155',
       brightRed:'#f87171',brightGreen:'#34d399',brightYellow:'#fbbf24',brightBlue:'#60a5fa',
       brightMagenta:'#c084fc',brightCyan:'#67e8f9',brightWhite:'#f8fafc'},
-    fontFamily:currentTermFont,fontSize:14,lineHeight:1.5,
+    fontFamily:currentTermFont,
+    fontSize:mobile?13:14,
+    lineHeight:1.5,
     cursorBlink:true,cursorStyle:'bar',scrollback:5000,allowTransparency:true,
+    // 移动端优化：允许长按选中文本复制
+    rightClickSelectsWord:true,
+    macOptionIsMeta:false,
   });
   fitAddon=new FitAddon.FitAddon();
   term.loadAddon(fitAddon);
   term.open(termEl);
   setTimeout(()=>fitAddon.fit(),80);
   term.onData(data=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'input',data}));});
+  // 移动端：选中文字后自动复制到剪贴板
+  if(mobile&&navigator.clipboard){
+    term.onSelectionChange(()=>{
+      const sel=term.getSelection();
+      if(sel)navigator.clipboard.writeText(sel).catch(()=>{});
+    });
+  }
 }
 window.addEventListener('resize',()=>{
   if(fitAddon)fitAddon.fit();
@@ -472,7 +534,10 @@ function openTermWindow(label){
     if(ws&&ws.readyState===WebSocket.OPEN&&term)ws.send(JSON.stringify({type:'resize',rows:term.rows,cols:term.cols}));
   },120);
 }
-function closeTermWindow(){document.getElementById('term-window').classList.remove('open');}
+function closeTermWindow(){
+  document.getElementById('term-window').classList.remove('open');
+  document.getElementById('vkb').classList.remove('show');
+}
 function connect(){
   const host=document.getElementById('host').value.trim();
   const port=parseInt(document.getElementById('port').value)||22;
