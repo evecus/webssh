@@ -17,7 +17,7 @@ func main() {
 	handler.Register(mux)
 
 	addr := fmt.Sprintf(":%d", *port)
-	log.Printf("WebSSH server started on http://localhost%s", addr)
+	log.Printf("WebSSH server started on http://0.0.0.0%s", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
 	}
