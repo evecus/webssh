@@ -308,19 +308,19 @@ const indexHTML = `<!DOCTYPE html>
     <div id="terminal"></div>
     <!-- 移动端虚拟按键栏，键盘弹出时显示 -->
     <div class="vkb" id="vkb">
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendCtrl('c')">Ctrl+C</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('-')">-</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('_')">_</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('+')">+</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendCtrl('c');sendFocus()" onclick="sendCtrl('c')">Ctrl+C</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('-');sendFocus()" onclick="sendKey('-')">-</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('_');sendFocus()" onclick="sendKey('_')">_</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('+');sendFocus()" onclick="sendKey('+')">+</button>
       <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('='")">=</button>
       <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('\\')"></button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('/')">/</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey(':'">:</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('chmod '">chmod</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('[A')">↑</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('[B')">↓</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('[D')">←</button>
-      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendFocus()" onclick="sendKey('[C')">→</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('/');sendFocus()" onclick="sendKey('/')">/</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey(':';sendFocus()" onclick="sendKey(':'">:</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('chmod ';sendFocus()" onclick="sendKey('chmod '">chmod</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('[A');sendFocus()" onclick="sendKey('[A')">↑</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('[B');sendFocus()" onclick="sendKey('[B')">↓</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('[D');sendFocus()" onclick="sendKey('[D')">←</button>
+      <button class="vkb-btn" onmousedown="event.preventDefault()" ontouchend="event.preventDefault();sendKey('[C');sendFocus()" onclick="sendKey('[C')">→</button>
     </div>
   </div>
 </div>
