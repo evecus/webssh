@@ -81,7 +81,7 @@ docker run -d -p 8888:8888 webssh
 docker run -d -p 8888:8888 \
   -e AUTH=true \
   -e STORE=true \
-  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data:/data \
   webssh
 
 # 使用 docker-compose
