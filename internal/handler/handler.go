@@ -171,8 +171,8 @@ func (a *appHandler) setupHandler(w http.ResponseWriter, r *http.Request) {
 			a.renderPage(w, setupHTMLTemplate, data)
 			return
 		}
-		if len(password) < 6 {
-			data["Error"] = "密码长度至少6位"
+		if len(password) < 1 {
+			data["Error"] = "密码不能为空"
 			a.renderPage(w, setupHTMLTemplate, data)
 			return
 		}
