@@ -14,6 +14,8 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=builder /app/webssh .
 
+RUN mkdir -p /app/data && chmod 755 /app/data
+
 # Data directory will be created at runtime if needed
 VOLUME ["/app/data"]
 
