@@ -119,7 +119,7 @@ func RemoveKnownHost(hostname string) error {
 			kept = append(kept, '\n')
 			continue
 		}
-		hosts, _, _, _, parseErr := ssh.ParseKnownHosts(line)
+		hosts, _, _, _, _, parseErr := ssh.ParseKnownHosts(line)
 		if parseErr != nil {
 			kept = append(kept, line...)
 			kept = append(kept, '\n')
