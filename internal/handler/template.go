@@ -506,6 +506,41 @@ const indexHTMLTemplate = `<!DOCTYPE html>
       text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .vkb-btn:active{background:rgba(168,85,247,0.2);color:#c084fc;border-color:#a855f7;}
 
+    /* ---- COPY OVERLAY（移动端长按复制） ---- */
+    /* 长按弹出的"复制/取消"小菜单 */
+    #longpress-menu{display:none;position:fixed;inset:0;z-index:400;
+      align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);}
+    #longpress-menu.show{display:flex;animation:fadeIn .18s ease both;}
+    .lp-card{background:#1a2236;border:1px solid #2d3f5a;border-radius:14px;
+      padding:8px;display:flex;flex-direction:column;gap:6px;min-width:160px;
+      box-shadow:0 16px 48px rgba(0,0,0,.6);animation:popIn .2s cubic-bezier(.22,1,.36,1) both;}
+    .lp-btn{padding:13px 20px;border:none;border-radius:9px;font-size:.95rem;font-weight:600;
+      cursor:pointer;transition:opacity .15s;-webkit-tap-highlight-color:transparent;}
+    .lp-btn.copy{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;}
+    .lp-btn.cancel{background:transparent;color:#64748b;border:1px solid #2d3f5a;}
+    .lp-btn:active{opacity:.75;}
+    /* 文本查看/复制弹框 */
+    #copy-viewer{display:none;position:fixed;z-index:410;
+      /* 略小于终端：四边各留16px */
+      top:calc(env(safe-area-inset-top,0px) + 16px);
+      left:16px;right:16px;
+      bottom:calc(env(safe-area-inset-bottom,0px) + 16px);
+      background:#0d1117;border:1px solid #2d3f5a;border-radius:12px;
+      display:none;flex-direction:column;overflow:hidden;
+      box-shadow:0 24px 64px rgba(0,0,0,.75);}
+    #copy-viewer.show{display:flex;animation:popIn .22s cubic-bezier(.22,1,.36,1) both;}
+    .cv-header{display:flex;align-items:center;padding:10px 14px;
+      background:#111827;border-bottom:1px solid #1e2d45;flex-shrink:0;gap:8px;}
+    .cv-title{flex:1;font-family:var(--font-mono);font-size:.72rem;color:#94a3b8;}
+    .cv-hint{font-size:.68rem;color:#4b5563;}
+    .cv-close{width:28px;height:28px;border:1px solid #2d3f5a;border-radius:6px;
+      background:transparent;color:#94a3b8;cursor:pointer;display:flex;align-items:center;
+      justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+    .cv-close:active{background:#1e2d45;}
+    #copy-viewer textarea{flex:1;background:#0d1117;color:#e2e8f0;border:none;outline:none;
+      font-family:var(--font-mono);font-size:.8rem;line-height:1.6;padding:12px;
+      resize:none;-webkit-user-select:text;user-select:text;word-break:break-all;}
+
     /* ---- ANIMATIONS ---- */
     @keyframes fadeDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
@@ -683,16 +718,36 @@ const indexHTMLTemplate = `<!DOCTYPE html>
       <button class="vkb-btn" ontouchend="e(event);sendKey('_')" onclick="sendKey('_')">_</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('~')" onclick="sendKey('~')">~</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('=')" onclick="sendKey('=')">=</button>
+      <button class="vkb-btn" ontouchend="e(event);sendCtrl('c')" onclick="sendCtrl('c')">Ctrl+C</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\\')" onclick="sendKey('\\')">\</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('|')" onclick="sendKey('|')">|</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b[A')" onclick="sendKey('\x1b[A')">↑</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b[B')" onclick="sendKey('\x1b[B')">↓</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b[D')" onclick="sendKey('\x1b[D')">←</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b[C')" onclick="sendKey('\x1b[C')">→</button>
-      <button class="vkb-btn" ontouchend="e(event);sendCtrl('c')" onclick="sendCtrl('c')">Ctrl+C</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b')" onclick="sendKey('\x1b')">ESC</button>
     </div>
   </div>
+</div>
+
+<!-- Long-press menu（移动端长按终端弹出） -->
+<div id="longpress-menu">
+  <div class="lp-card">
+    <button class="lp-btn copy" onclick="openCopyViewer()">复制终端内容</button>
+    <button class="lp-btn cancel" onclick="closeLongpressMenu()">取消</button>
+  </div>
+</div>
+
+<!-- Copy viewer（展示终端当前屏幕文本供复制） -->
+<div id="copy-viewer">
+  <div class="cv-header">
+    <span class="cv-title">终端内容</span>
+    <span class="cv-hint">长按文本即可复制</span>
+    <button class="cv-close" onclick="closeCopyViewer()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <textarea id="copy-viewer-text" readonly spellcheck="false"></textarea>
 </div>
 
 <!-- Settings Modal -->
@@ -1242,29 +1297,52 @@ function openTermWindow(label) {
   document.body.style.position = 'fixed';
   document.body.style.width = '100%';
   updateVkb();
-  // 修复终端触摸滚动：接管 #terminal 内的 touchmove，让 xterm viewport 自己滚
+  // 修复终端触摸：滚动 + 长按检测（互斥）
   const termEl = document.getElementById('terminal');
   if (termEl && !termEl._touchScrollBound) {
     termEl._touchScrollBound = true;
-    let _ty = 0;
+    let _ty = 0, _tx = 0, _lpTimer = null, _moved = false;
+
     termEl.addEventListener('touchstart', ev => {
-      if (ev.touches.length === 1) _ty = ev.touches[0].clientY;
+      if (ev.touches.length !== 1) return;
+      _ty = ev.touches[0].clientY;
+      _tx = ev.touches[0].clientX;
+      _moved = false;
+      // 800ms 无移动则触发长按
+      _lpTimer = setTimeout(() => {
+        if (!_moved) showLongpressMenu();
+      }, 800);
     }, {passive: true});
+
     termEl.addEventListener('touchmove', ev => {
       if (ev.touches.length !== 1) return;
+      const dx = Math.abs(ev.touches[0].clientX - _tx);
+      const dy = Math.abs(ev.touches[0].clientY - _ty);
+      // 移动超过 8px 就认为是滚动，取消长按
+      if (dx > 8 || dy > 8) {
+        _moved = true;
+        if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
+      }
       const vp = termEl.querySelector('.xterm-viewport');
       if (!vp) return;
-      const dy = _ty - ev.touches[0].clientY;
+      const delta = _ty - ev.touches[0].clientY;
       _ty = ev.touches[0].clientY;
-      // 在滚动边界内才阻止冒泡，避免整页弹跳
-      const atTop = vp.scrollTop <= 0 && dy < 0;
-      const atBot = vp.scrollTop + vp.clientHeight >= vp.scrollHeight - 1 && dy > 0;
+      const atTop = vp.scrollTop <= 0 && delta < 0;
+      const atBot = vp.scrollTop + vp.clientHeight >= vp.scrollHeight - 1 && delta > 0;
       if (!atTop && !atBot) {
         ev.stopPropagation();
-        vp.scrollTop += dy;
+        vp.scrollTop += delta;
       }
       ev.preventDefault();
     }, {passive: false});
+
+    termEl.addEventListener('touchend', () => {
+      if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
+    }, {passive: true});
+
+    termEl.addEventListener('touchcancel', () => {
+      if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
+    }, {passive: true});
   }
   setTimeout(() => {
     fitAddon && fitAddon.fit();
@@ -1280,6 +1358,50 @@ function closeTermWindow() {
   document.body.style.overflow = '';
   document.body.style.position = '';
   document.body.style.width = '';
+}
+
+// ---- 长按复制相关 ----
+
+function showLongpressMenu() {
+  if (!isMobile()) return;
+  document.getElementById('longpress-menu').classList.add('show');
+}
+
+function closeLongpressMenu() {
+  document.getElementById('longpress-menu').classList.remove('show');
+}
+
+function openCopyViewer() {
+  closeLongpressMenu();
+  if (!term) return;
+
+  // 读取当前屏幕可见行
+  const buf = term.buffer.active;
+  const rows = term.rows;
+  const lines = [];
+  for (let i = 0; i < rows; i++) {
+    const line = buf.getLine(i);
+    if (line) lines.push(line.translateToString(true));
+  }
+  // 去掉末尾空行，保留中间内容
+  let text = lines.join('\n').replace(/\n+$/, '');
+
+  const ta = document.getElementById('copy-viewer-text');
+  ta.value = text;
+  document.getElementById('copy-viewer').classList.add('show');
+
+  // 自动滚到底部（最新内容），方便复制最近输出
+  setTimeout(() => {
+    ta.scrollTop = ta.scrollHeight;
+    // iOS 需要手动 setSelectionRange 才能触发选文
+    ta.focus();
+  }, 80);
+}
+
+function closeCopyViewer() {
+  document.getElementById('copy-viewer').classList.remove('show');
+  // 回到终端继续操作
+  if (term) setTimeout(() => term.focus(), 50);
 }
 
 function connect() {
