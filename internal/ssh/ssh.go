@@ -93,52 +93,7 @@ func tofuHostKeyCallback(hostname string, remote net.Addr, key ssh.PublicKey) er
 		"If the host key legitimately changed, remove its entry from data/known_hosts", hostname)
 }
 
-// RemoveKnownHost 从 known_hosts 删除指定 hostname 的记录（主机密钥更换时使用）
-func RemoveKnownHost(hostname string) error {
-	khMu.Lock()
-	defer khMu.Unlock()
-	data, err := os.ReadFile(knownHostsFile)
-	if err != nil {
-		return err
-	}
-	var kept []byte
-	for len(data) > 0 {
-		var line []byte
-		i := 0
-		for i < len(data) && data[i] != '\n' {
-			i++
-		}
-		line = data[:i]
-		if i < len(data) {
-			data = data[i+1:]
-		} else {
-			data = data[i:]
-		}
-		if len(line) == 0 || line[0] == '#' {
-			kept = append(kept, line...)
-			kept = append(kept, '\n')
-			continue
-		}
-		hosts, _, _, _, _, parseErr := ssh.ParseKnownHosts(line)
-		if parseErr != nil {
-			kept = append(kept, line...)
-			kept = append(kept, '\n')
-			continue
-		}
-		match := false
-		for _, h := range hosts {
-			if h == hostname {
-				match = true
-				break
-			}
-		}
-		if !match {
-			kept = append(kept, line...)
-			kept = append(kept, '\n')
-		}
-	}
-	return os.WriteFile(knownHostsFile, kept, 0600)
-}
+
 
 type Config struct {
 	Host       string
