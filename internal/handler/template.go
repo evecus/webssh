@@ -467,14 +467,12 @@ const indexHTMLTemplate = `<!DOCTYPE html>
       display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.65);
       animation:popIn .3s cubic-bezier(.22,1,.36,1) both;}
     @keyframes popIn{from{transform:scale(.93) translateY(20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
-    /* 移动端：真正全屏，顶部到安全区底部 */
+    /* 移动端：高度由JS动态设置为window.innerHeight，绕过浏览器地址栏偏差 */
     @media(max-width:640px){
       #term-window{align-items:stretch;padding:0;}
       .term-popup{
         width:100%;max-width:100%;
-        /* 全高：减去顶部安全区（刘海/状态栏），底部安全区由vkb的padding-bottom吃掉 */
-        height:calc(100% - env(safe-area-inset-top,0px));
-        margin-top:env(safe-area-inset-top,0px);
+        height:100%; /* fallback，JS会覆盖 */
         max-height:none;border-radius:0;border:none;
         animation:slideUp .3s cubic-bezier(.22,1,.36,1) both;}
       @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
@@ -718,6 +716,7 @@ const indexHTMLTemplate = `<!DOCTYPE html>
       <button class="vkb-btn" ontouchend="e(event);sendKey('_')" onclick="sendKey('_')">_</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('~')" onclick="sendKey('~')">~</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('=')" onclick="sendKey('=')">=</button>
+      <button class="vkb-btn" ontouchend="e(event);sendCtrl('c')" onclick="sendCtrl('c')">Ctrl+C</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\\')" onclick="sendKey('\\')">\</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('|')" onclick="sendKey('|')">|</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b[A')" onclick="sendKey('\x1b[A')">↑</button>
@@ -725,7 +724,6 @@ const indexHTMLTemplate = `<!DOCTYPE html>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b[D')" onclick="sendKey('\x1b[D')">←</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b[C')" onclick="sendKey('\x1b[C')">→</button>
       <button class="vkb-btn" ontouchend="e(event);sendKey('\x1b')" onclick="sendKey('\x1b')">ESC</button>
-      <button class="vkb-btn" ontouchend="e(event);sendCtrl('c')" onclick="sendCtrl('c')">Ctrl+C</button>
     </div>
   </div>
 </div>
@@ -1290,6 +1288,7 @@ function initTerm() {
 }
 
 window.addEventListener('resize', () => {
+  setTermPopupHeight();
   if (fitAddon) setTimeout(() => {
     fitAddon.fit();
     if (term && ws && ws.readyState === WebSocket.OPEN)
@@ -1298,6 +1297,14 @@ window.addEventListener('resize', () => {
   updateVkb();
 });
 
+function setTermPopupHeight() {
+  // 用 window.innerHeight 精确设置高度，绕过移动浏览器地址栏导致的 100vh/100% 偏差
+  if (window.innerWidth <= 640) {
+    const popup = document.querySelector('.term-popup');
+    if (popup) popup.style.height = window.innerHeight + 'px';
+  }
+}
+
 function openTermWindow(label) {
   document.getElementById('term-title').textContent = label;
   document.getElementById('term-window').classList.add('open');
@@ -1305,6 +1312,8 @@ function openTermWindow(label) {
   document.body.style.overflow = 'hidden';
   document.body.style.position = 'fixed';
   document.body.style.width = '100%';
+  // 精确设置高度为可视区域（排除浏览器地址栏）
+  setTermPopupHeight();
   updateVkb();
   // 修复终端触摸：滚动 + 长按检测（互斥）
   const termEl = document.getElementById('terminal');
@@ -1384,11 +1393,12 @@ function openCopyViewer() {
   closeLongpressMenu();
   if (!term) return;
 
-  // 读取当前屏幕可见行
+  // 读取当前 scrollback 中最近100行
   const buf = term.buffer.active;
-  const rows = term.rows;
+  const totalLines = buf.length;
+  const startLine = Math.max(0, totalLines - 100);
   const lines = [];
-  for (let i = 0; i < rows; i++) {
+  for (let i = startLine; i < totalLines; i++) {
     const line = buf.getLine(i);
     if (line) lines.push(line.translateToString(true));
   }
