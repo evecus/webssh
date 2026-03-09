@@ -653,7 +653,7 @@ const indexHTMLTemplate = `<!DOCTYPE html>
           <label>密码</label>
           <div class="input-wrap">
             <svg class="input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <input type="password" id="password" placeholder="请输入密码"/>
+            <input type="password" id="password" placeholder="请输入密码" oninput="if(selectedProfileId){selectedProfileId=null;this.placeholder='请输入密码';}"/>
           </div>
         </div>
       </div>
@@ -1200,13 +1200,13 @@ function selectSSHProfile() {
   if (!selectedProfileId) { closeSSHList(); return; }
   const p = sshProfiles.find(x => x.id === selectedProfileId);
   if (!p) { closeSSHList(); return; }
-  // Fill form
+  // 填充非敏感字段
   const nameEl = document.getElementById('conn-name');
   if (nameEl) nameEl.value = p.name || '';
   document.getElementById('host').value = p.host || '';
   document.getElementById('port').value = p.port || 22;
   document.getElementById('username').value = p.username || '';
-  // Switch tab
+  // 切换到对应认证 tab
   const tab = p.auth_type === 'key' ? 'key' : 'password';
   document.querySelectorAll('.auth-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
@@ -1215,10 +1215,19 @@ function selectSSHProfile() {
     pane.classList.toggle('active', pane.id === 'pane-' + tab);
   });
   currentTab = tab;
-  if (tab === 'password') document.getElementById('password').value = p.password || '';
-  else { document.getElementById('passphrase').value = p.passphrase || ''; privateKeyData = p.private_key || ''; }
+  // 不填充密码/私钥，改为显示占位提示；连接时由服务端从存储取凭证
+  if (tab === 'password') {
+    const pwEl = document.getElementById('password');
+    pwEl.value = '';
+    pwEl.placeholder = '已保存，连接时自动使用';
+  } else {
+    document.getElementById('passphrase').value = '';
+    privateKeyData = '';
+    // 显示私钥已保存提示
+    const keyLabel = document.querySelector('#pane-key .field-label') || document.querySelector('#pane-key label');
+  }
   closeSSHList();
-  showToast('✓ 已加载：' + (p.name || p.host));
+  showToast('✓ 已选择：' + (p.name || p.host) + '（凭证将自动使用）');
 }
 
 // ---- Terminal ----
@@ -1409,10 +1418,6 @@ function connect() {
   const port = parseInt(document.getElementById('port').value) || 22;
   const username = document.getElementById('username').value.trim() || 'root';
   if (!host) { showToast('⚠ ' + t('err_host')); return; }
-  const password = currentTab === 'password' ? document.getElementById('password').value : '';
-  const private_key = currentTab === 'key' ? privateKeyData : '';
-  const passphrase = currentTab === 'key' ? document.getElementById('passphrase').value : '';
-  if (!password && !private_key) { showToast('⚠ ' + t('err_auth')); return; }
 
   const btn = document.getElementById('btn-connect');
   btn.disabled = true;
@@ -1420,7 +1425,27 @@ function connect() {
 
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   ws = new WebSocket(proto + '://' + location.host + '/ws');
-  ws.onopen = () => ws.send(JSON.stringify({type:'connect',host,port,username,password,private_key,passphrase}));
+
+  let connectMsg;
+  if (selectedProfileId) {
+    // 已选择保存的 profile：只传 profile_id，凭证由服务端从存储取
+    connectMsg = { type: 'connect', profile_id: selectedProfileId };
+  } else {
+    // 手动填写模式
+    const password = currentTab === 'password' ? document.getElementById('password').value : '';
+    const private_key = currentTab === 'key' ? privateKeyData : '';
+    const passphrase = currentTab === 'key' ? document.getElementById('passphrase').value : '';
+    if (!password && !private_key) {
+      showToast('⚠ ' + t('err_auth'));
+      btn.disabled = false;
+      resetBtn();
+      ws.close(); ws = null;
+      return;
+    }
+    connectMsg = { type: 'connect', host, port, username, password, private_key, passphrase };
+  }
+
+  ws.onopen = () => ws.send(JSON.stringify(connectMsg));
   ws.onmessage = e => {
     const msg = JSON.parse(e.data);
     if (msg.type === 'connected') {
