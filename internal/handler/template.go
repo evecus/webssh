@@ -1227,7 +1227,7 @@ function selectSSHProfile() {
     const keyLabel = document.querySelector('#pane-key .field-label') || document.querySelector('#pane-key label');
   }
   closeSSHList();
-  showToast('✓ 已选择：' + (p.name || p.host) + '（凭证将自动使用）');
+  showToast('✓ 已选择：' + (p.name || p.host));
 }
 
 // ---- Terminal ----
